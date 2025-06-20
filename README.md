@@ -71,33 +71,43 @@ clean:
 ```
 
 # Compiler and flags
+```
 FF = gfortran
 FFLAGS = -cpp -fno-align-commons -O3 -ffpe-trap=zero,invalid,underflow,overflow \
          -std=legacy -ffixed-line-length-none -fall-intrinsics \
          -Wno-unused-variable -Wno-unused-function -Wno-conversion -fopenmp
 FMOD = -Jmod -Imod
 PROGRAM = some_program
+```
 
 # Directories
+```
 LIB     = lib/some_library.a
 SRC_DIR = src
 OBJ_DIR = obj
 MOD_DIR = mod
+```
 
 # Topologically sorted module sources looking recursively through a source directory
+```
 TOPOLOGIC_SRC = $(shell maketopologicf90 -D $(SRC_DIR))
+```
 
 # Corresponding object files
+```
 OBJECTS = $(foreach src,$(TOPOLOGIC_SRC),$(OBJ_DIR)/$(basename $(notdir $(src))).o)
+```
 
 # Link target
+```
 all: $(PROGRAM)
 
 #Build the program
 $(PROGRAM): $(OBJECTS)
 	$(FF) $(FFLAGS) -o $@ $^ $(LIB)
-
+```
 # Pattern rules
+```
 obj/%.o: src/%.f90
 	@mkdir -p obj mod
 	$(FF) $(FFLAGS) $(FMOD) -c $< -o $@
@@ -105,7 +115,10 @@ obj/%.o: src/%.f90
 obj/%.o: src/%.for
 	@mkdir -p obj mod
 	$(FF) $(FFLAGS) $(FMOD) -c $< -o $@
+```
 
+# Clean up
+```
 clean:
 	rm -f obj/*.o mod/*.mod $(PROGRAM)
-
+```

@@ -23,9 +23,9 @@ typedef struct FortranFile {
     int uses_capacity;
 } FortranFile;
 
-FortranFile *files = NULL;
-int file_count = 0;
-int file_capacity = 0;
+static FortranFile *files = NULL;
+static int file_count = 0;
+static int file_capacity = 0;
 
 typedef struct HashEntry {
     char key[MAX_MODULE_LEN];
@@ -33,7 +33,7 @@ typedef struct HashEntry {
     struct HashEntry *next;
 } HashEntry;
 
-HashEntry *hash_table[HASH_SIZE] = {0};
+static HashEntry *hash_table[HASH_SIZE] = {0};
 
 unsigned int fnv1a_hash(const char *str) {
     const unsigned int FNV_prime = 16777619U;
@@ -288,8 +288,8 @@ typedef struct {
     int capacity;
 } AdjList;
 
-AdjList *adj = NULL;
-int *in_degree = NULL;
+static AdjList *adj = NULL;
+static int *in_degree = NULL;
 
 void ensure_adj_capacity(int u) {
     if (adj[u].count >= adj[u].capacity) {
@@ -539,6 +539,7 @@ int main(int argc, char **argv) {
         read_files_in_dir(D_dirs[i], 1);
     }
 
+    //Free the memory
     free_dirs(d_dirs, d_count);
     free_dirs(D_dirs, D_count);
 
@@ -547,9 +548,20 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    //Find all the modules prefaced by module module_name
+    //Allows for multiple modules in the file and stores them in 
+    //the hash table as (filename, index in filelist)
     find_defined_modules();
+
+    //Find all the actual use modulename statements and then lookup if it's
+    //in the hashtable. If it is, we store it in the used file list. 
+    //That is, we store the index of the file 
+    // [1,0,0,0,0,0] => Single module
+    // [1,1,0,0,0,0] => Second file depends on the first if we have an index in element 0. 
     find_used_modules();
 
+    //Build the adjacency graph by the files the module name appears in.
+    //This is the entire graph of dependencies when that list is topologically sorted. 
     build_graph();
 
     int *sorted = malloc(file_count * sizeof(int));
@@ -558,6 +570,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    //Topolgocially sort the graph by the adjacency graph.
     if (!topologic_sort(sorted, &file_count)) {
         fprintf(stderr, "Error: cyclic dependency detected, no valid build order\n");
         free(sorted);
