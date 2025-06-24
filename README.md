@@ -35,7 +35,6 @@ FMOD = -Jmod -Imod
 PROGRAM = program
 
 # Directories
-LIB     = lib/some_library.a
 SRC_DIR = src
 OBJ_DIR = obj
 MOD_DIR = mod
@@ -44,27 +43,28 @@ MOD_DIR = mod
 TOPOLOGIC_SRC = $(shell maketopologicf90 -D $(SRC_DIR))
 
 # Corresponding object files
-OBJECTS = $(foreach src,$(TOPOLOGIC_SRC),$(OBJ_DIR)/$(basename $(notdir $(src))).o)
+OBJECTS = $(patsubst $(SRC_DIR)/%.f90, $(OBJ_DIR)/%.o, \
+          $(patsubst $(SRC_DIR)/%.for, $(OBJ_DIR)/%.o, $(TOPOLOGIC_SRC)))
 
 # Link target
 all: $(PROGRAM)
 
-#Build the program
+# Build the program
 $(PROGRAM): $(OBJECTS)
-	$(FF) $(FFLAGS) -o $@ $^ $(LIB)
+	$(FF) $(FFLAGS) -o $@ $^
 
-# Pattern rules
-obj/%.o: src/%.f90
-	@mkdir -p obj mod
+# Generic pattern rule for both .f90 and .for files
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.f90
+	@mkdir -p $(dir $@) $(MOD_DIR)
 	$(FF) $(FFLAGS) $(FMOD) -c $< -o $@
 
-obj/%.o: src/%.for
-	@mkdir -p obj mod
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.for
+	@mkdir -p $(dir $@) $(MOD_DIR)
 	$(FF) $(FFLAGS) $(FMOD) -c $< -o $@
 
+# Clean rule
 clean:
-	rm -f obj/*.o mod/*.mod $(PROGRAM)
-
+	rm -rf $(OBJ_DIR)/*.o $(MOD_DIR)/*.mod $(PROGRAM)
 ```
 
 # Compiler and flags
