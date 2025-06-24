@@ -4,9 +4,7 @@ Program: Fortran module dependency analyzer and topologic build order printer.
 
 Usage:
     -d DIRS   Comma-separated list of directories to scan non-recursively.
-            Only one -d flag allowed.
     -D DIRS   Comma-separated list of directories to scan recursively.
-            Only one -D flag allowed.
     -m        Print a Makefile dependency list instead of build order.
     -h        Show this help message.
 
@@ -18,8 +16,7 @@ Description:
 
 Notes:
     - Repeated use of -d or -D flags is an error.
-    - Directories in the flags are comma-separated and will be scanned in the order
-    given.
+    - Directories in the flags are comma-separated and will be scanned in the order given
     - If neither -d nor -D is specified, defaults to scanning 'src' non-recursively.
 
 Author:
